@@ -39,4 +39,10 @@ describe "WatirmarkEmail::QAMail" do
       txt = e.get_email_text(@not_present_search_terms, 15, false)
     }.should raise_error Timeout::Error
   end
+
+  it "should delete a sample email with 'Watirmark Email test message' in the body of the email" do
+    e         = WatirmarkEmail::QAMail.new(@username, @password)
+    email_body_text = e.get_email_text(@search_terms, 30, true)
+    email_body_text.should match(/Watirmark Email test message/)
+  end
 end

@@ -20,8 +20,8 @@ module WatirmarkEmail
     def copy(search_array, destination_folder=@inbox)
       begin
         @log.debug("copying to #{destination_folder}")
-        imap = connect
-        email_id = imap.search(search_array).last
+        imap      = connect
+        email_id  = imap.search(search_array).last
         email_uid = imap.fetch(email_id, 'UID').last.attr['UID']
         raise "Original message not found to copy!" unless email_uid
         imap.uid_copy(email_uid, destination_folder)
@@ -61,9 +61,9 @@ module WatirmarkEmail
       # Trying super ugly workaraound for the gmail 'Too many simlutaneous connections' error.
       # Just trying to login to gmail and if it fails try to wait until other connections
       # are closed and try again.
-      email_text = nil
+      email_text    = nil
       email_subject = nil
-      email_uid = nil
+      email_uid     = nil
 
       ::Timeout.timeout(timeout) do
         @log.debug("start Timeout block for #{timeout} seconds")
@@ -72,10 +72,10 @@ module WatirmarkEmail
             imap = connect
             msgs = imap.search(search_array)
             if (msgs && msgs.length > 0)
-              email_id = msgs.last
-              email_uid = imap.fetch(email_id, 'UID').last.attr['UID']
-              email_text = imap.uid_fetch(email_uid, 'BODY[TEXT]').last.attr['BODY[TEXT]']
-              envelope = imap.uid_fetch(email_uid, 'ENVELOPE').last.attr['ENVELOPE']
+              email_id      = msgs.last
+              email_uid     = imap.fetch(email_id, 'UID').last.attr['UID']
+              email_text    = imap.uid_fetch(email_uid, 'BODY[TEXT]').last.attr['BODY[TEXT]']
+              envelope      = imap.uid_fetch(email_uid, 'ENVELOPE').last.attr['ENVELOPE']
               email_subject = envelope.subject
             end
           rescue => e
@@ -84,8 +84,7 @@ module WatirmarkEmail
             if (delete && email_uid)
               @log.info("Deleting the email message #{email_subject}")
               # the next step only needs to be run if we are in gmail
-              imap.uid_copy(email_uid, @trash)
-              imap.uid_store(email_uid, "+FLAGS", [:Deleted])
+              delete(email_uid, imap)
             end
             disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
           end
@@ -100,24 +99,29 @@ module WatirmarkEmail
 
   class Gmail < BaseController
     attr_accessor :inbox
-    URL = "imap.gmail.com"
-    PORT = 993
+    URL           = "imap.gmail.com"
+    PORT          = 993
     MAILBOX_INBOX = "INBOX"
     MAILBOX_TRASH = "[Gmail]/Trash"
-    MAILBOX_ALL = "[Gmail]/All Mail"
+    MAILBOX_ALL   = "[Gmail]/All Mail"
 
     # Constructor for this class.
     # This will initialize all variables according to the type email service this is using.
     def initialize(email, password, logLevel = ::Logger::INFO)
-      @email = email
-      @password = password
-      @log = ::Logger.new STDOUT
+      @email     = email
+      @password  = password
+      @log       = ::Logger.new STDOUT
       @log.level = logLevel
-      @url = URL
-      @port = PORT
-      @inbox = MAILBOX_INBOX
-      @trash = MAILBOX_TRASH
-      @ssl = true # port 993
+      @url       = URL
+      @port      = PORT
+      @inbox     = MAILBOX_INBOX
+      @trash     = MAILBOX_TRASH
+      @ssl       = true # port 993
+    end
+
+    def delete(email_uid, imap)
+      imap.uid_copy(email_uid, @trash)
+      imap.uid_store(email_uid, "+FLAGS", [:Deleted])
     end
 
 
@@ -150,7 +154,7 @@ module WatirmarkEmail
     #
     def get_email_text(search_array, timeout=600, delete=true, since_sec=3600)
       # Only look for emails that have come in since the last hour
-      since = Time.now - since_sec
+      since             = Time.now - since_sec
       imap_search_terms = search_array.dup.push("SINCE", since.strftime('%d-%b-%Y'))
       @log.debug("Searching for email with query: #{imap_search_terms}")
 
@@ -158,10 +162,10 @@ module WatirmarkEmail
     end
 
     def send_email(to, opts={})
-      opts[:from] ||= 'qa@convio.com'
+      opts[:from]       ||= 'qa@convio.com'
       opts[:from_alias] ||= 'Watirmark Email'
-      opts[:subject] ||= "test"
-      opts[:body] ||= "Watirmark Email test message"
+      opts[:subject]    ||= "test"
+      opts[:body]       ||= "Watirmark Email test message"
 
       smtp = Net::SMTP.new 'smtp.gmail.com', 587
       smtp.enable_starttls
@@ -171,10 +175,10 @@ From: #{opts[:from_alias]} <#{opts[:from]}>
 To: <#{to}>
 Subject: #{opts[:subject]}
 
-#{opts[:body]}
+      #{opts[:body]}
 END_OF_MESSAGE
 
-      response = smtp.start('smtp.gmail.com',@email,@password, :plain ) do |smpt|
+      response = smtp.start('smtp.gmail.com', @email, @password, :plain) do |smpt|
         smtp.send_message msg, opts[:from], to
       end
 
@@ -188,21 +192,26 @@ END_OF_MESSAGE
   end
 
   class QAMail < BaseController
-    URL = "qasendmail.corp.convio.com"
-    PORT = 143
+    URL           = "qasendmail.corp.convio.com"
+    PORT          = 143
     MAILBOX_INBOX = "Inbox"
 
     # Constructor for this class.
     # This will initialize all variables according to the type email service this is using.
     def initialize(account, password=nil, logLevel = ::Logger::INFO)
-      @email = account
-      @password ||= account
-      @log = ::Logger.new STDOUT
+      @email     = account
+      @password  ||= account
+      @log       = ::Logger.new STDOUT
       @log.level = logLevel
-      @url = URL
-      @port = PORT
-      @inbox = MAILBOX_INBOX
-      @ssl = false # port 143
+      @url       = URL
+      @port      = PORT
+      @inbox     = MAILBOX_INBOX
+      @ssl       = false # port 143
+    end
+
+    def delete(email_uid, imap)
+      imap.uid_store(email_uid, "+FLAGS", [:Deleted])
+      imap.expunge
     end
 
     # This keeps polling the email inbox until a message is found with the given
@@ -239,18 +248,18 @@ END_OF_MESSAGE
     end
 
     def send_email(to, opts={})
-      opts[:server] ||= 'qasendmail.corp.convio.com'
-      opts[:from] ||= 'qa@convio.com'
+      opts[:server]     ||= 'qasendmail.corp.convio.com'
+      opts[:from]       ||= 'qa@convio.com'
       opts[:from_alias] ||= 'Watirmark Email'
-      opts[:subject] ||= "test"
-      opts[:body] ||= "Watirmark Email test message"
+      opts[:subject]    ||= "test"
+      opts[:body]       ||= "Watirmark Email test message"
 
       msg = <<END_OF_MESSAGE
 From: #{opts[:from_alias]} <#{opts[:from]}>
 To: <#{to}>
 Subject: #{opts[:subject]}
 
-#{opts[:body]}
+      #{opts[:body]}
 END_OF_MESSAGE
 
       response = Net::SMTP.start(opts[:server]) do |smtp|
