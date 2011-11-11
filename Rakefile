@@ -15,7 +15,7 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "watirmark_email"
-  gem.homepage = "http://github.com/abaird/watirmark_email"
+  gem.homepage = "http://github.com/convio/watirmark_email"
   gem.license = "MIT"
   gem.summary = %Q{watirmark_email is a gem for getting email from an IMAP server}
   gem.description = %Q{watirmark_email lets you get email from both GMAIL and generic IMAP servers}
@@ -47,3 +47,17 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+# from watirmark - consider how to implement the deploy task
+#package = Rake::GemPackageTask.new(spec) {}
+#gem = "ruby #{Config::CONFIG['bindir']}\\gem"
+#
+#desc 'Create the gem'
+#task :install => :gem do
+#  sh "#{gem} install --both --no-rdoc --no-ri pkg\\#{package.gem_file} --source http://qalin.corp.convio.com:8808"
+#end
+#
+#desc "deploy the gem to the gem server; must be run on on qalin"
+#task :deploy => :gem do
+#  sh "#{gem} install --local -i c:\\gem_server --no-ri pkg\\#{package.gem_file} --ignore-dependencies"
+#end
