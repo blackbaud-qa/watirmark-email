@@ -48,16 +48,14 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-# from watirmark - consider how to implement the deploy task
-#package = Rake::GemPackageTask.new(spec) {}
-#gem = "ruby #{Config::CONFIG['bindir']}\\gem"
-#
-#desc 'Create the gem'
-#task :install => :gem do
-#  sh "#{gem} install --both --no-rdoc --no-ri pkg\\#{package.gem_file} --source http://qalin.corp.convio.com:8808"
-#end
-#
-#desc "deploy the gem to the gem server; must be run on on qalin"
-#task :deploy => :gem do
-#  sh "#{gem} install --local -i c:\\gem_server --no-ri pkg\\#{package.gem_file} --ignore-dependencies"
-#end
+# surely there must be a better way to build the deploy task??!!??
+def gemfile_name
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+  "watirmark_email-#{version}.gem"
+end
+gem = "ruby #{Config::CONFIG['bindir']}\\gem"
+
+desc "deploy the gem to the gem server; must be run on on qalin"
+task :deploy do
+  sh "#{gem} install --local -i c:\\gem_server --no-ri pkg\\#{gemfile_name} --ignore-dependencies"
+end
