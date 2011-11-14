@@ -56,6 +56,6 @@ end
 gem = "ruby #{Config::CONFIG['bindir']}\\gem"
 
 desc "deploy the gem to the gem server; must be run on on qalin"
-task :deploy do
+task :deploy => :build do
   sh "#{gem} install --local -i c:\\gem_server --no-ri pkg\\#{gemfile_name} --ignore-dependencies"
 end
