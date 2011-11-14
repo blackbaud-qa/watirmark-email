@@ -125,7 +125,7 @@ END_OF_MESSAGE
           begin
             imap = connect
             msgs = imap.search(search_terms)
-            @log.debug("found message numbers: #{msgs.each { |x| p x }}")
+            @log.debug("found message numbers: #{msgs}")
             if (msgs && msgs.length > 0)
               email_uids = msgs.inject([]) { |email_uids, email_id| email_uids << imap.fetch(email_id, 'UID').last.attr['UID'] }
             end
@@ -139,7 +139,7 @@ END_OF_MESSAGE
           sleep 10
         end
       end
-      @log.debug("found UIDS: #{email_uids.each { |uid| p uid }}")
+      @log.debug("found UIDS: #{email_uids}}")
       email_uids
     end
   end
