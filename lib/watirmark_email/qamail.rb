@@ -8,7 +8,7 @@ module WatirmarkEmail
     # This will initialize all variables according to the type email service this is using.
     def initialize(account, password=nil, logLevel = ::Logger::INFO)
       @email     = account
-      @password  ||= account
+      @password  = password || account
       @log       = ::Logger.new STDOUT
       @log.level = logLevel
       @url       = URL
@@ -24,7 +24,7 @@ module WatirmarkEmail
 
     # used for testing
     def delete_emails(search_terms, timeout = 60)
-      uid_list = get_emails_by_uid(search_terms, timeout)
+      uid_list = find_email_uids(search_terms, timeout)
       imap     = connect
       uid_list.each do |uid|
         imap.uid_store(uid, "+FLAGS", [:Deleted])
@@ -93,10 +93,30 @@ END_OF_MESSAGE
     end
 
     def find_emails(search_terms, timeout = 60)
-      get_emails_by_uid(search_terms, timeout)
+      uids   = find_email_uids(search_terms, timeout)
+      emails = WatirmarkEmail::EmailCollection.new
+
+      ::Timeout.timeout(timeout) do
+        @log.debug("start Timeout block for #{timeout} seconds")
+        loop do
+          begin
+            imap      = connect
+            fetchdata = imap.uid_fetch(uids, ["ENVELOPE", "BODY[TEXT]", "BODY[]", "UID"])
+            emails.add_emails(fetchdata)
+          rescue => e
+            @log.info("#{e.class}: #{e.message}")
+          ensure
+            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
+          end
+          break unless emails.empty?
+          @log.debug("Couldn't find email yet ... trying again")
+          sleep 10
+        end
+      end
+      emails
     end
 
-    def get_emails_by_uid(search_terms, timeout = 60)
+    def find_email_uids(search_terms, timeout = 60)
       email_uids = []
 
       ::Timeout.timeout(timeout) do
@@ -107,9 +127,7 @@ END_OF_MESSAGE
             msgs = imap.search(search_terms)
             @log.debug("found message numbers: #{msgs.each { |x| p x }}")
             if (msgs && msgs.length > 0)
-              msgs.each do |email_id|
-                email_uids << imap.fetch(email_id, 'UID').last.attr['UID']
-              end
+              email_uids = msgs.inject([]) { |email_uids, email_id| email_uids << imap.fetch(email_id, 'UID').last.attr['UID'] }
             end
           rescue => e
             @log.info("Error connecting to IMAP: #{e.message}")

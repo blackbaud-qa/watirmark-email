@@ -22,20 +22,20 @@ describe "Get Emails" do
     emails.length.should == 5
   end
 
-  #it "when searching by subject \"Multiple Email Test\", each found email should have a subject and a body with an incrementing number" do
-  #  emails = @e.find_emails(@search_terms)
-  #  0.upto(4).each do |x|
-  #    emails[x].subject.should == "#{@subject} - message #{x + 1}"
-  #    emails[x].body_text.should == "#{@subject} - message #{x + 1}"
-  #  end
-  #end
-  #
-  #it "when searching by subject \"Multiple Email Test\", mapping the subjects to an array returns an array of length 5" do
-  #  expected_subject_array = ["#{@subject} - message 1",
-  #                            "#{@subject} - message 2",
-  #                            "#{@subject} - message 3",
-  #                            "#{@subject} - message 4",
-  #                            "#{@subject} - message 5"]
-  #  @e.find_emails(@search_terms).map { |email| email.subject }.sort.should == expected_subject_array
-  #end
+  it "when searching by subject \"Multiple Email Test\", each found email should have a subject and a body with an incrementing number" do
+    emails = @e.find_emails(@search_terms)
+    0.upto(4).each do |x|
+      emails[x].subject.should == "#{@subject} - message #{x + 1}"
+      emails[x].body_text.should =~ /#{@subject} - message #{x + 1}/
+    end
+  end
+
+  it "when searching by subject \"Multiple Email Test\", mapping the subjects to an array returns an array of length 5" do
+    expected_subject_array = ["#{@subject} - message 1",
+                              "#{@subject} - message 2",
+                              "#{@subject} - message 3",
+                              "#{@subject} - message 4",
+                              "#{@subject} - message 5"]
+    @e.find_emails(@search_terms).map { |email| email.subject }.sort.should == expected_subject_array
+  end
 end

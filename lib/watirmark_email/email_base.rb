@@ -3,9 +3,11 @@ module WatirmarkEmail
     # Connects using the credentials supplied on initialize, returns the IMAP object.  Most of the time, if all you want
     # is an email, you won't need to use this method as get_email_text handles connect for you.
     def connect
+      puts"#{@url.inspect}, #{@port.inspect}, #{@ssl.inspect}, #{@email.inspect}, #{@password.inspect}, #{@inbox.inspect}"
       imap = Net::IMAP.new(@url, @port, @ssl)
       imap.login(@email, @password)
       imap.select(@inbox)
+      puts imap
       imap
     end
 
