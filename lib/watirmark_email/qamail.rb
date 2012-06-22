@@ -66,6 +66,12 @@ module WatirmarkEmail
       super search_array, timeout, delete
     end
 
+    def get_email_attachment(search_arry, timeout=600)
+      @log.debug("Searching for email attachment with query: #{search_arry}")
+
+      super search_arry, timeout
+    end
+
     def send_email(to, opts={})
       opts[:server]     ||= 'qasendmail.corp.convio.com'
       opts[:from]       ||= 'qa@convio.com'

@@ -1,6 +1,6 @@
 GEM
   remote: http://gemcutter.org/
-  remote: http://172.20.6.101:8808/
+  remote: http://gemserver.qa.convioanalyticstest.net:8808/
   specs:
     diff-lcs (1.1.3)
     git (1.2.5)

@@ -67,6 +67,41 @@ module WatirmarkEmail
       end
       email_text
     end
+
+    #returns the name of the email attachment
+    #returns nil if there is no attachment
+    def get_email_attachment(search_array, timeout=600)
+      attachment = nil
+      finished = false
+      ::Timeout.timeout(timeout) do
+        @log.debug("start Timeout block for #{timeout} seconds")
+        loop do
+          begin
+            imap = connect
+            msgs = imap.search(search_array)
+            if (msgs && msgs.length > 0)
+              msgs.each do |msgID|
+                msg = imap.fetch(msgID, ["ENVELOPE", "UID", "BODY"])[0]
+                body = msg.attr["BODY"]
+                attachment = body.parts[1].param['NAME']
+                finished = true
+                #TODO read text of .pdf file
+                #grab attachment file
+                #attachment_file = imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"]
+              end
+            end
+          rescue => e
+            @log.info("Error connecting to IMAP: #{e.message}")
+          ensure
+            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
+          end
+          break if finished
+          @log.debug("Couldn't find email yet ... trying again")
+          sleep 10
+        end
+      end
+      attachment
+    end
   end
 end
 
