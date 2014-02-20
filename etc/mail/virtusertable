@@ -1,7 +1,7 @@
-root@qasendmail.corp.convio.com	root
+root@qasendmail.conviocloud.com	root
 root				root
 @convio.com			vmail
-@qasendmail.corp.convio.com	vmail
+@qasendmail.conviocloud.com	vmail
 .com				vmail
 .edu				vmail
 .net				vmail

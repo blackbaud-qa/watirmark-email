@@ -634,7 +634,7 @@ H?M?Message-Id: <$t.$i@$j>
 Sqasendmail
 R$*			$: $>3 $1 
 R$* < @ $+ > $*		$: $1 
-R$*			$@ $1@qasendmail.corp.convio.com
+R$*			$@ $1@qasendmail.conviocloud.com
 
 
 ############################################
