@@ -66,6 +66,12 @@ module WatirmarkEmail
       super search_array, timeout, delete
     end
 
+    def get_email_replyto(search_array, timeout=600, delete=true)
+      @log.debug("Searching for email with query: #{search_array}")
+
+      super search_array, timeout, delete
+    end
+
     def get_email_attachment(search_arry, timeout=600)
       @log.debug("Searching for email attachment with query: #{search_arry}")
 

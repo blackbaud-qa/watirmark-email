@@ -68,6 +68,38 @@ module WatirmarkEmail
       email_text
     end
 
+    def get_email_replyto(search_array, timeout=600, delete=true)
+      envelope = nil
+      email_uid = nil
+
+      ::Timeout.timeout(timeout) do
+        @log.debug("start Timeout block for #{timeout} seconds")
+        loop do
+          begin
+            imap = connect
+            msgs = imap.search(search_array)
+            if (msgs && msgs.length > 0)
+              email_id = msgs.last
+              email_uid = imap.fetch(email_id, 'UID').last.attr['UID']
+              envelope = imap.uid_fetch(email_uid, 'ENVELOPE').last.attr['ENVELOPE']
+            end
+          rescue => e
+            @log.info("Error connecting to IMAP: #{e.message}")
+          ensure
+            if (delete && email_uid)
+              @log.info("Deleting the email message #{email_subject}")
+              delete(email_uid, imap)
+            end
+            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
+          end
+          break if envelope
+          @log.debug("Couldn't find email yet ... trying again")
+          sleep 10
+        end
+      end
+      "#{envelope.reply_to[0].name} <#{envelope.reply_to[0].mailbox}@#{envelope.reply_to[0].host}>"
+    end
+
     #returns the name of the email attachment
     #returns nil if there is no attachment
     def get_email_attachment(search_array, timeout=600)
