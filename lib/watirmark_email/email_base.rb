@@ -87,7 +87,6 @@ module WatirmarkEmail
             @log.info("Error connecting to IMAP: #{e.message}")
           ensure
             if (delete && email_uid)
-              @log.info("Deleting the email message #{email_subject}")
               delete(email_uid, imap)
             end
             disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
