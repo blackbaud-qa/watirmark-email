@@ -30,6 +30,39 @@ module WatirmarkEmail
       end
     end
 
+    def get_email(search_hash, timeout=600, delete=true, since_sec=3600)
+      email = Email.new
+      ::Timeout.timeout(timeout) do
+        @log.debug("start Timeout block for #{timeout} seconds")
+        loop do
+          begin
+            imap = connect
+            search_array = search_hash_to_array(search_hash)
+            msgs = imap.search(search_array)
+            if msgs.size > 0
+              email.message_id = msgs.last
+              email.uid = imap.fetch(email.message_id , 'UID').last.attr['UID']
+              email.body_text = imap.uid_fetch(email.uid , 'BODY[TEXT]').last.attr['BODY[TEXT]']
+              email.body_raw = imap.uid_fetch(email.uid , 'BODY[]').last.atter['BODY[]']
+              email.envelope = imap.uid_fetch(email.uid , 'ENVELOPE').last.attr['ENVELOPE']
+            end
+          rescue => e
+            @log.info("Error connecting to IMAP: #{e.message}")
+          ensure
+            if (delete && email.uid)
+              @log.info("Deleting the email message #{email.subject}")
+              delete(email.uid, imap)
+            end
+            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
+          end
+          break if (!email.nil? && email.body_text)
+          @log.debug("Couldn't find email yet ... trying again")
+          sleep 10
+        end
+      end
+      email
+    end
+
     def search_hash_to_array (hash_of_search_params)
       converted_array = Array.new
       hash_of_search_params.each do | search_key, search_value |
