@@ -66,15 +66,17 @@ module WatirmarkEmail
     def search_hash_to_array (hash_of_search_params)
       converted_array = Array.new
       hash_of_search_params.each do | search_key, search_value |
-        converted_array = converted_array + search_element_array(search_key.to_s.upcase, search_value.to_s)
+        converted_array = converted_array + search_elements_array(search_key.to_s.upcase, search_value.to_s)
       end
+      converted_array
     end
 
-    def search_element_array (key_string, value)
+    def search_elements_array (key_string, value)
       result_array = Array.new
       first, *rest = *value
       result_array.concat [key_string, first]
-      result_array + search_element_array(key_string, rest) unless rest.empty?
+      result_array = result_array + search_elements_array(key_string, rest) unless rest.empty?
+      result_array
     end
 
     def get_email_text(search_array, timeout=600, delete=true, since_sec=3600)
