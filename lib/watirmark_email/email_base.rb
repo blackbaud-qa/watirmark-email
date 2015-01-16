@@ -42,9 +42,9 @@ module WatirmarkEmail
             if msgs.size > 0
               email.message_id = msgs.last
               email.uid = imap.fetch(email.message_id , 'UID').last.attr['UID']
+              email.envelope = imap.uid_fetch(email.uid , 'ENVELOPE').last.attr['ENVELOPE']
               email.body_text = imap.uid_fetch(email.uid , 'BODY[TEXT]').last.attr['BODY[TEXT]']
               email.body_raw = imap.uid_fetch(email.uid , 'BODY[]').last.atter['BODY[]']
-              email.envelope = imap.uid_fetch(email.uid , 'ENVELOPE').last.attr['ENVELOPE']
             end
           rescue => e
             @log.info("Error connecting to IMAP: #{e.message}")
