@@ -30,6 +30,20 @@ module WatirmarkEmail
       end
     end
 
+    def search_hash_to_array (hash_of_search_params)
+      converted_array = Array.new
+      hash_of_search_params.each do | search_key, search_value |
+        converted_array = converted_array + search_element_array(search_key.to_s.upcase, search_value.to_s)
+      end
+    end
+
+    def search_element_array (key_string, value)
+      result_array = Array.new
+      first, *rest = *value
+      result_array.concat [key_string, first]
+      result_array + search_element_array(key_string, rest) unless rest.empty?
+    end
+
     def get_email_text(search_array, timeout=600, delete=true, since_sec=3600)
       # Trying super ugly workaraound for the gmail 'Too many simlutaneous connections' error.
       # Just trying to login to gmail and if it fails try to wait until other connections
