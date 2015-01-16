@@ -1,19 +1,28 @@
 module WatirmarkEmail
   class Email
-    attr_accessor :date, :subject, :to, :from, :message_id, :body_text, :body_raw, :uid
+    attr_accessor :date, :subject, :to, :from, :message_id, :body_text, :body_raw, :uid, :envelope
 
-    def initialize(envelope, body_text, body_raw, uid)
-      @to = []
-      @date = envelope.date
-      @subject = envelope.subject
-      envelope.to.each do |recipient|
+    def subject
+      @subject||= envelope.subject
+    end
+
+    def date
+      @date||= envelope.date
+    end
+
+    def message_id
+      @message_id||= envelope.message_id
+    end
+
+    def from
+      @from||= "#{envelope.from.first.mailbox}@#{envelope.from.first.host}"
+    end
+
+    def to
+      @to||= envelope.to.each do |recipient|
+        @to||= Array.new
         @to << "#{recipient.mailbox}@#{recipient.host}"
       end
-      @from = "#{envelope.from.first.mailbox}@#{envelope.from.first.host}"
-      @message_id = envelope.message_id
-      @body_text = body_text
-      @body_raw = body_raw
-      @uid = uid
     end
 
     def <=> (other)
@@ -49,11 +58,12 @@ module WatirmarkEmail
       #should be an array of Net::IMAP::FetchData or a single class
       email_info = [email_info] unless email_info.is_a?(Array)
       email_info.each do |email|
-        envelope = email.attr["ENVELOPE"]
-        body_text = email.attr["BODY[TEXT]"]
-        body_raw = email.attr["BODY[]"]
-        uid = email.attr["UID"]
-        @emails << Email.new(envelope, body_text, body_raw, uid)
+        current_email = Email.new
+        current_email.envelope = email.attr["ENVELOPE"]
+        current_email.body_text = email.attr["BODY[TEXT]"]
+        current_email.body_raw = email.attr["BODY[]"]
+        current_email.uid = email.attr["UID"]
+        @emails << current_email.dup
       end
     end
   end
