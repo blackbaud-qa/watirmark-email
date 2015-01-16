@@ -19,9 +19,8 @@ module WatirmarkEmail
     end
 
     def to
-      @to||= envelope.to.each do |recipient|
-        @to||= Array.new
-        @to << "#{recipient.mailbox}@#{recipient.host}"
+      @to||= envelope.to.each_with_object([]) do |recipient, to_array|
+        to_array << "#{recipient.mailbox}@#{recipient.host}"
       end
     end
 
