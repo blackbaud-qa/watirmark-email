@@ -27,6 +27,10 @@ module WatirmarkEmail
     def <=> (other)
       date <=> other.date
     end
+
+    def has_envelope?
+      not envelope.nil?
+    end
   end
 
   class EmailCollection
