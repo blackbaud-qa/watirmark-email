@@ -49,13 +49,13 @@ module WatirmarkEmail
           rescue => e
             @log.info("Error connecting to IMAP: #{e.message}")
           ensure
-            if (delete && email.uid)
+            if delete && email.uid
               @log.info("Deleting the email message #{email.subject}")
               delete(email.uid, imap)
             end
             disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
           end
-          break if (!email.nil? && email.body_text)
+          break if break if email.has_envelope?
           @log.debug("Couldn't find email yet ... trying again")
           sleep 10
         end
