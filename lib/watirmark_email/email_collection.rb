@@ -3,23 +3,23 @@ module WatirmarkEmail
     attr_accessor :date, :subject, :to, :from, :message_id, :body_text, :body_raw, :uid, :envelope
 
     def subject
-      @subject||= envelope.subject
+      @subject ||= envelope.subject
     end
 
     def date
-      @date||= envelope.date
+      @date ||= envelope.date
     end
 
     def message_id
-      @message_id||= envelope.message_id
+      @message_id ||= envelope.message_id
     end
 
     def from
-      @from||= "#{envelope.from.first.mailbox}@#{envelope.from.first.host}"
+      @from ||= "#{envelope.from.first.mailbox}@#{envelope.from.first.host}"
     end
 
     def to
-      @to||= envelope.to.each_with_object([]) do |recipient, to_array|
+      @to ||= envelope.to.each_with_object([]) do |recipient, to_array|
         to_array << "#{recipient.mailbox}@#{recipient.host}"
       end
     end
