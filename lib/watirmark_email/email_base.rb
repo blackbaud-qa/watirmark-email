@@ -30,7 +30,7 @@ module WatirmarkEmail
       end
     end
 
-    def get_email(search_hash, timeout=600, delete=true, since_sec=3600)
+    def get_email(search_hash, timeout=600, delete=true)
       email = Email.new
       ::Timeout.timeout(timeout) do
         @log.debug("start Timeout block for #{timeout} seconds")
