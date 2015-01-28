@@ -1,6 +1,6 @@
 module WatirmarkEmail
   class Email
-    attr_accessor :date, :subject, :to, :from, :message_id, :body_text, :body_raw, :uid, :envelope
+    attr_accessor :date, :subject, :to, :reply_to, :from, :message_id, :body_text, :body_raw, :uid, :envelope
 
     def subject
       @subject ||= envelope.subject
@@ -22,6 +22,10 @@ module WatirmarkEmail
       @to ||= envelope.to.each_with_object([]) do |recipient, to_array|
         to_array << "#{recipient.mailbox}@#{recipient.host}"
       end
+    end
+
+    def reply_to
+      @reply_to ||= "#{envelope.reply_to.first.name} <#{envelope.reply_to.first.mailbox}@#{envelope.reply_to.first.host}>"
     end
 
     def <=> (other)
