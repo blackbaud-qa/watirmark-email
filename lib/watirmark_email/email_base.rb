@@ -55,7 +55,7 @@ module WatirmarkEmail
             end
             disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
           end
-          break if break if email.has_envelope?
+          break if email.has_envelope?
           @log.debug("Couldn't find email yet ... trying again")
           sleep 10
         end
