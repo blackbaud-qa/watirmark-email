@@ -22,8 +22,8 @@ module WatirmarkEmail
     end
 
     def tos
-      @tos ||= envelope.to.each_with_object([]) do |recipient, tos_array|
-        tos_array << "#{recipient.mailbox}@#{recipient.host}"
+      @tos ||= envelope.to.each_with_object([]) do |to_user, tos_array|
+        tos_array << "#{to_user.mailbox}@#{to_user.host}"
       end
     end
 
