@@ -18,14 +18,54 @@ module WatirmarkEmail
       @from ||= "#{envelope.from.first.mailbox}@#{envelope.from.first.host}"
     end
 
+    def froms
+      @froms  ||= envelope.from.each_with_object([]) do |from_user, froms_array|
+        froms_array << "#{from_user.mailbox}@#{from_user.host}"
+      end
+    end
+
     def to
       @to ||= envelope.to.each_with_object([]) do |recipient, to_array|
         to_array << "#{recipient.mailbox}@#{recipient.host}"
       end
     end
 
+    def tos
+      @tos ||= envelope.to.each_with_object([]) do |recipient, tos_array|
+        tos_array << "#{recipient.mailbox}@#{recipient.host}"
+      end
+    end
+
     def reply_to
       @reply_to ||= "#{envelope.reply_to.first.name} <#{envelope.reply_to.first.mailbox}@#{envelope.reply_to.first.host}>"
+    end
+
+    def reply_tos
+        @reply_tos ||= envelope.reply_to.each_with_object([]) do |reply_to_user, reply_tos_array|
+          reply_tos_array <<  "#{reply_to_user.name} <#{reply_to_user.mailbox}@#{reply_to_user.host}>"
+        end
+    end
+
+    def senders
+      @senders ||=  envelope.sender.each_with_object([]) do |sender_user, senders_array|
+        senders_array <<  "#{sender_user.name} <#{sender_user.mailbox}@#{sender_user.host}>"
+      end
+    end
+
+    def bccs
+      @bccs ||=  envelope.bcc.each_with_object([]) do |bcc_user, bccs_array|
+        bccs_array <<  "#{bcc_user.name} <#{bcc_user.mailbox}@#{bcc_user.host}>"
+      end
+    end
+
+    def ccs
+      @ccs ||=  envelope.cc.each_with_object([]) do |cc_user, ccs_array|
+        ccs_array <<  "#{cc_user.name} <#{cc_user.mailbox}@#{cc_user.host}>"
+      end
+    end
+
+    def in_reply_to
+      @in_reply_to ||= envelope.in_reply_to
     end
 
     def <=> (other)
@@ -62,7 +102,6 @@ module WatirmarkEmail
     alias :size :length
 
     def add_emails(email_info)
-      #should be an array of Net::IMAP::FetchData or a single class
       email_info = [email_info] unless email_info.is_a?(Array)
       email_info.each do |email|
         current_email = Email.new
