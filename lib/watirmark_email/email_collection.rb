@@ -40,15 +40,15 @@ module WatirmarkEmail
     end
 
     def bccs
-      @bccs ||=  envelope.bcc.each_with_object([]) do |bcc_user, bccs_array|
+      @bccs ||= envelope.bcc ? envelope.bcc.each_with_object([]) do |bcc_user, bccs_array|
         bccs_array <<  "#{bcc_user.name} <#{bcc_user.mailbox}@#{bcc_user.host}>"
-      end
+      end : Array.new
     end
 
     def ccs
-      @ccs ||=  envelope.cc.each_with_object([]) do |cc_user, ccs_array|
+      @ccs ||= envelope.cc ? envelope.cc.each_with_object([]) do |cc_user, ccs_array|
         ccs_array <<  "#{cc_user.name} <#{cc_user.mailbox}@#{cc_user.host}>"
-      end
+      end : Array.new
     end
 
     def in_reply_to
