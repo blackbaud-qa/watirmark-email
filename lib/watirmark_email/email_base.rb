@@ -64,6 +64,7 @@ module WatirmarkEmail
     end
 
     def search_hash_to_array (hash_of_search_params)
+      raise "Parameter given is not a hash" unless hash_of_search_params.class == Hash
       converted_array = Array.new
       hash_of_search_params.each do | search_key, search_value |
         converted_array = converted_array + search_elements_array(search_key.to_s.upcase, search_value.to_s)
