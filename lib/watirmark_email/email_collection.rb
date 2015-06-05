@@ -16,39 +16,27 @@ module WatirmarkEmail
     end
 
     def froms
-      @froms  ||= envelope.from.each_with_object([]) do |from_user, froms_array|
-        froms_array << "#{from_user.mailbox}@#{from_user.host}"
-      end
+      @froms  ||= construct_array_for(envelope.from)
     end
 
     def tos
-      @tos ||= envelope.to.each_with_object([]) do |to_user, tos_array|
-        tos_array << "#{to_user.mailbox}@#{to_user.host}"
-      end
+      @tos ||= construct_array_for(envelope.to)
     end
 
     def reply_tos
-        @reply_tos ||= envelope.reply_to.each_with_object([]) do |reply_to_user, reply_tos_array|
-          reply_tos_array <<  "#{reply_to_user.name} <#{reply_to_user.mailbox}@#{reply_to_user.host}>"
-        end
+        @reply_tos ||= construct_array_for(envelope.reply_to)
     end
 
     def senders
-      @senders ||=  envelope.sender.each_with_object([]) do |sender_user, senders_array|
-        senders_array <<  "#{sender_user.name} <#{sender_user.mailbox}@#{sender_user.host}>"
-      end
+      @senders ||= construct_array_for(envelope.sender)
     end
 
     def bccs
-      @bccs ||= envelope.bcc ? envelope.bcc.each_with_object([]) do |bcc_user, bccs_array|
-        bccs_array <<  "#{bcc_user.name} <#{bcc_user.mailbox}@#{bcc_user.host}>"
-      end : Array.new
+      @bccs ||= construct_array_for(envelope.bcc)
     end
 
     def ccs
-      @ccs ||= envelope.cc ? envelope.cc.each_with_object([]) do |cc_user, ccs_array|
-        ccs_array <<  "#{cc_user.name} <#{cc_user.mailbox}@#{cc_user.host}>"
-      end : Array.new
+      @ccs ||= construct_array_for(envelope.cc)
     end
 
     def in_reply_to
@@ -62,6 +50,17 @@ module WatirmarkEmail
     def has_envelope?
       not envelope.nil?
     end
+
+    private
+
+    def construct_array_for field_values
+      result_array = Array.new
+      field_values.each do |user|
+        result_array <<  "#{user.name} <#{user.mailbox}@#{user.host}>"
+      end
+      result_array
+    end
+
   end
 
   class EmailCollection
