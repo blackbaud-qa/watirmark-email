@@ -19,4 +19,21 @@ describe 'test BaseController helper methods' do
     expect { WatirmarkEmail::BaseController.new.search_hash_to_array("Test") }.to raise_error
   end
 
+  it "should get an email with a mocked imap" do
+    base_controller = MyController.new
+
+    search_hash = {:subject => 'Test Subject', :reply_to => 'test@devnull.com'}
+
+    base_controller.get_email(search_hash)
+  end
+
+  class MyController < WatirmarkEmail::BaseController
+    def connect
+
+    end
+
+    def disconnect
+
+    end
+  end
 end
