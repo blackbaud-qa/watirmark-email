@@ -7,10 +7,10 @@ module WatirmarkEmail
     # Constructor for this class.
     # This will initialize all variables according to the type email service this is using.
     def initialize(account, password=nil, logLevel = ::Logger::INFO)
+      super logLevel
+
       @email     = account
       @password  = password || account
-      @log       = ::Logger.new STDOUT
-      @log.level = logLevel
       @url       = URL
       @port      = PORT
       @inbox     = MAILBOX_INBOX

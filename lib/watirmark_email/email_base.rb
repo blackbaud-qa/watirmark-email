@@ -1,5 +1,11 @@
 module WatirmarkEmail
   class BaseController
+
+    def initialize(logLevel = ::Logger::INFO)
+      @log       = ::Logger.new STDOUT
+      @log.level = logLevel
+    end
+
     # Connects using the credentials supplied on initialize, returns the IMAP object.  Most of the time, if all you want
     # is an email, you won't need to use this method as get_email_text handles connect for you.
     def connect
