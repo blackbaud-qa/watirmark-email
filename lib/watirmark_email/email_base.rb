@@ -71,7 +71,7 @@ module WatirmarkEmail
 
                 if body.respond_to?('parts')
                   attachment_name = body.parts[1].param['NAME']
-                  attachment_file = imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"]
+                  attachment_file = Base64.decode64(imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"])
                 end
 
                 reply_to = "#{envelope.reply_to[0].name} <#{envelope.reply_to[0].mailbox}@#{envelope.reply_to[0].host}>"
