@@ -31,78 +31,31 @@ module WatirmarkEmail
     end
 
     def get_email_text(search_array, timeout=600, delete=true, since_sec=3600)
-      # Trying super ugly workaraound for the gmail 'Too many simlutaneous connections' error.
-      # Just trying to login to gmail and if it fails try to wait until other connections
-      # are closed and try again.
-      email_text    = nil
-      email_subject = nil
-      email_uid     = nil
-
-      ::Timeout.timeout(timeout) do
-        @log.debug("start Timeout block for #{timeout} seconds")
-        loop do
-          begin
-            imap = connect
-            msgs = imap.search(search_array)
-            if (msgs && msgs.length > 0)
-              email_id      = msgs.last
-              email_uid     = imap.fetch(email_id, 'UID').last.attr['UID']
-              email_text    = imap.uid_fetch(email_uid, 'BODY[TEXT]').last.attr['BODY[TEXT]']
-              envelope      = imap.uid_fetch(email_uid, 'ENVELOPE').last.attr['ENVELOPE']
-              email_subject = envelope.subject
-            end
-          rescue => e
-            @log.info("Error connecting to IMAP: #{e.message}")
-          ensure
-            if (delete && email_uid)
-              @log.info("Deleting the email message #{email_subject}")
-              delete(email_uid, imap)
-            end
-            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
-          end
-          break if email_text
-          @log.debug("Couldn't find email yet ... trying again")
-          sleep 10
-        end
-      end
-      email_text
+      gather_email_data(search_array, timeout) { "return email_text" }
     end
 
     def get_email_replyto(search_array, timeout=600, delete=true)
-      envelope = nil
-      email_uid = nil
-
-      ::Timeout.timeout(timeout) do
-        @log.debug("start Timeout block for #{timeout} seconds")
-        loop do
-          begin
-            imap = connect
-            msgs = imap.search(search_array)
-            if (msgs && msgs.length > 0)
-              email_id = msgs.last
-              email_uid = imap.fetch(email_id, 'UID').last.attr['UID']
-              envelope = imap.uid_fetch(email_uid, 'ENVELOPE').last.attr['ENVELOPE']
-            end
-          rescue => e
-            @log.info("Error connecting to IMAP: #{e.message}")
-          ensure
-            if (delete && email_uid)
-              delete(email_uid, imap)
-            end
-            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
-          end
-          break if envelope
-          @log.debug("Couldn't find email yet ... trying again")
-          sleep 10
-        end
-      end
-      "#{envelope.reply_to[0].name} <#{envelope.reply_to[0].mailbox}@#{envelope.reply_to[0].host}>"
+      gather_email_data(search_array, timeout) { "return bad_things_reply_to" }
     end
 
     #returns the name of the email attachment
     #returns nil if there is no attachment
     def get_email_attachment(search_array, timeout=600)
-      attachment = nil
+      gather_email_data(search_array, timeout) { "return attachment_name" }
+    end
+
+    def get_email_attachment_file(search_array, timeout=600)
+      gather_email_data(search_array, timeout) { 'return attachment_name' }
+    end
+
+    private
+    def gather_email_data(search_array, timeout)
+      #define all of the variables we'd like to potentially return
+      attachment_file = nil
+      attachment_name = nil
+      reply_to = nil
+      email_text = nil
+
       finished = false
       ::Timeout.timeout(timeout) do
         @log.debug("start Timeout block for #{timeout} seconds")
@@ -113,12 +66,19 @@ module WatirmarkEmail
             if (msgs && msgs.length > 0)
               msgs.each do |msgID|
                 msg = imap.fetch(msgID, ["ENVELOPE", "UID", "BODY"])[0]
+                envelope = msg.attr['ENVELOPE']
                 body = msg.attr["BODY"]
-                attachment = body.parts[1].param['NAME']
+
+                if body.respond_to?('parts')
+                  attachment_name = body.parts[1].param['NAME']
+                  attachment_file = imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"]
+                end
+
+                reply_to = "#{envelope.reply_to[0].name} <#{envelope.reply_to[0].mailbox}@#{envelope.reply_to[0].host}>"
+
+                email_text = body
+
                 finished = true
-                #TODO read text of .pdf file
-                #grab attachment file
-                #attachment_file = imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"]
               end
             end
           rescue => e
@@ -131,12 +91,8 @@ module WatirmarkEmail
           sleep 10
         end
       end
-      attachment
+      eval yield
     end
+
   end
 end
-
-
-
-
-

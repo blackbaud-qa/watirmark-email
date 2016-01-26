@@ -38,4 +38,8 @@ describe "Get Emails" do
                               "#{@subject} - message 5"]
     @e.find_emails(@search_terms).map { |email| email.subject }.sort.should == expected_subject_array
   end
+
+  it "should be able to retrieve the replyTo" do
+    puts @e.get_email_replyto(@search_terms).should == "Watirmark Email <qa@convio.com>"
+  end
 end
