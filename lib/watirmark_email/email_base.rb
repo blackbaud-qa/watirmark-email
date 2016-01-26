@@ -133,6 +133,34 @@ module WatirmarkEmail
       end
       attachment
     end
+
+    def get_email_attachment_file(search_array, timeout=600)
+      attachment_file = nil
+      finished = false
+      ::Timeout.timeout(timeout) do
+        @log.debug("start Timeout block for #{timeout} seconds")
+        loop do
+          begin
+            imap = connect
+            msgs = imap.search(search_array)
+            if (msgs && msgs.length > 0)
+              msgs.each do |msgID|
+                attachment_file = Base64.decode64(imap.fetch(msgID, "BODY[#{2}]")[0].attr["BODY[#{2}]"])
+                finished = true
+              end
+            end
+          rescue => e
+            @log.info("Error connecting to IMAP: #{e.message}")
+          ensure
+            disconnect(imap) unless imap.nil? # because sometimes the timeout happens before imap is defined
+          end
+          break if finished
+          @log.debug("Couldn't find email yet ... trying again")
+          sleep 10
+        end
+      end
+      attachment_file
+    end
   end
 end
 
