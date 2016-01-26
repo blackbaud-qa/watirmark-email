@@ -45,7 +45,7 @@ module WatirmarkEmail
     end
 
     def get_email_attachment_file(search_array, timeout=600)
-      gather_email_data(search_array, timeout) { 'return attachment_name' }
+      gather_email_data(search_array, timeout) { "return attachment_file" }
     end
 
     private
