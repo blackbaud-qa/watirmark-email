@@ -24,7 +24,7 @@ describe "WatirmarkEmail::QAMail" do
 
   it 'should send an email to qamail' do
     e = WatirmarkEmail::QAMail.new(@username, @password)
-    e.send_email(@send_to, :subject => 'UNIT TEST MESSAGE', :body => "Watirmark Email test message").should be_true
+    e.send_email(@send_to, :subject => 'UNIT TEST MESSAGE', :body => "Watirmark Email test message").should == true
   end
 
   it "should get a sample email with 'Watirmark Email test message' in the body of the email" do
