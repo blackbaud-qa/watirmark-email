@@ -12,5 +12,3 @@ require 'watirmark_email'
 #  username: <supply your own>
 #  password: <not telling>
 CREDENTIALS = YAML.load_file(File.join(File.dirname(__FILE__), "email_server_credentials.yaml"))
-
-alias :context :describe
