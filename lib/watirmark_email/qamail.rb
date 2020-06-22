@@ -1,6 +1,6 @@
 module WatirmarkEmail
   class QAMail < BaseController
-    URL           = "bvtmail.conviocloud.com"
+    URL           = "bvtmail.blackbaudcloud.com"
     PORT          = 143
     MAILBOX_INBOX = "Inbox"
 
@@ -79,7 +79,7 @@ module WatirmarkEmail
     end
 
     def send_email(to, opts={})
-      opts[:server]     ||= 'bvtmail.conviocloud.com'
+      opts[:server]     ||= 'bvtmail.blackbaudcloud.com'
       opts[:from]       ||= 'qa@convio.com'
       opts[:from_alias] ||= 'Watirmark Email'
       opts[:subject]    ||= "test"
